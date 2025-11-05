@@ -1,4 +1,3 @@
-// tracer.c  — Linux x86_64 only
 #define _GNU_SOURCE
 #include <errno.h>
 #include <signal.h>
@@ -7,15 +6,15 @@
 #include <string.h>
 #include <sys/ptrace.h>
 #include <sys/types.h>
-#include <sys/user.h>     // struct user_regs_struct
+#include <sys/user.h>     
 #include <sys/wait.h>
-#include <sys/syscall.h>  // SYS_read, SYS_write, ...
+#include <sys/syscall.h>  
 #include <unistd.h>
-
+// 判斷是不是read or write
 static int is_rw(long nr) {
     return nr == SYS_read || nr == SYS_write;
 }
-
+// 回傳相對應字串
 static const char *nr2name(long nr) {
     return nr == SYS_read ? "read" :
            nr == SYS_write ? "write" : "?";
