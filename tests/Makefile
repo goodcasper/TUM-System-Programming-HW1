@@ -14,3 +14,5 @@ ${ROOT_DIR}/test_error: ${ROOT_DIR}/test_error.c
 
 ${ROOT_DIR}/test_empty: ${ROOT_DIR}/test_empty.c
 	gcc -Og -g -o $@ $<
+clean:
+	rm -f *.o *.so
