@@ -1,2 +1,0 @@
-[workspace]
-members = [ "librw-1", "librw-2" ]

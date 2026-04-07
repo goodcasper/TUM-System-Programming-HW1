@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include <sys/syscall.h>  
 #include <unistd.h>
+
 // 判斷是不是read or write
 static int is_rw(long nr) {
     return nr == SYS_read || nr == SYS_write;
@@ -22,22 +23,23 @@ static const char *nr2name(long nr) {
 
 int main(int argc, char *argv[]) {
 
-    pid_t pid = fork();
+    pid_t pid = fork(); // 建立一個process，pid是在child process是0，在parent process是 child process的pid，小於0代表錯誤
 
     if (pid < 0) { // fork fail
-        perror("fork");
+        perror("fork"); // 印出「最近一次系統錯誤」對應的錯誤訊息，傳入的字串也會印出
         return 1;
     }
 
     if (pid == 0) { // child process
-    
-        if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) == -1) { // 讓父process可以來追蹤子process
-            perror("PTRACE_TRACEME"); // 失敗時要進行的處理
-            _exit(1);
+        // ptrace 也可當作 sys call (實則wrapper)
+        if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) == -1) { // 宣告自己可以被父行程追蹤
+            perror("PTRACE_TRACEME"); 
+            _exit(1); // 直接進入kernel 終止 process
         }
 
+        
+        raise(SIGSTOP); // 發送一個訊號，使自己進入stop狀態
         // 先暫停直到父process呼叫ptrace(syscall)才繼續執行 讓父行程有機會設置 options
-        raise(SIGSTOP); // 使process進入stop狀態
 
         // 以被追蹤身分執行目標程式
         execvp(argv[1], &argv[1]); // 跳去執行目標程式 如果有跳成功就不會執行下面
@@ -144,6 +146,5 @@ int main(int argc, char *argv[]) {
             break;
         }
     }
-
     return 0;
 }
